@@ -11,7 +11,9 @@ RUN python -m pip install --no-cache-dir -r "./requirements.txt"
 COPY "./issyou_detector/" "./issyou_detector/"
 COPY "./issyou-detector.py" "./"
 
-RUN ln --symbolic "$(realpath ${DATA_DIR})" "/var/lib/issyou-detector"
-RUN ln --symbolic "$(realpath ${LOG_DIR})" "/var/log/issyou-detector"
+RUN mkdir -p "/var/lib/issyou-detector"
+RUN ln --symbolic "/var/lib/issyou-detector" "$(realpath ${DATA_DIR})"
+RUN mkdir -p "/var/log/issyou-detector"
+RUN ln --symbolic "/var/log/issyou-detector" "$(realpath ${LOG_DIR})"
 
 CMD [ "python", "./issyou-detector.py" ]
