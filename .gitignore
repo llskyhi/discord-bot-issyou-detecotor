@@ -1,0 +1,14 @@
+# Should have a local copy from `.env.template`
+.env
+
+# Should have a local copy from `logging-config.yaml.template`
+logging-config.yaml
+
+# Python
+__pycache__/
+
+# miscellaneous
+## default log directory
+logs/
+## default single-file data store
+data/

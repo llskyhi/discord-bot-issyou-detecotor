@@ -1,0 +1,16 @@
+name: issyou-detector
+services:
+  issyou-detector:
+    container_name: issyou-detector
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - DATA_DIR=${ISSYOU_DETECTOR_DATA_DIR}
+        - LOG_DIR=${ISSYOU_DETECTOR_LOG_DIR}
+    volumes:
+      - ./.env:/opt/issyou-detector/.env:ro
+      - ./logging-config.yaml:/opt/issyou-detector/logging-config.yaml:ro
+      - ${ISSYOU_DETECTOR_CONTAINER_HOST_DATA_DIR}:/var/lib/issyou-detector/:rw
+      - ${ISSYOU_DETECTOR_CONTAINER_HOST_LOG_DIR}:/var/log/issyou-detector/:rw
+    restart: always

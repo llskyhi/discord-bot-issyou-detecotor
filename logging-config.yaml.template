@@ -1,0 +1,34 @@
+version: 1
+disable_existing_loggers: false
+
+root:
+  level: DEBUG
+  handlers:
+    - console
+    - file
+
+formatters:
+  brief:
+    format: '%(asctime)s (%(relativeCreated)8d) %(levelname)8s| (%(name)s) %(message)s'
+    datefmt: '%H:%M:%S'
+  detailed:
+    format: '%(asctime)s (+%(relativeCreated)8d ms) %(levelname)8s| (%(name)s) %(filename)s:%(lineno)d::%(funcName)s| %(message)s'
+    datefmt: '%Y-%m-%dT%H:%M:%S%z'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: brief
+    level: INFO
+    stream: ext://sys.stdout
+  file:
+    class: logging.handlers.TimedRotatingFileHandler
+    formatter: detailed
+    level: DEBUG
+    filename: ./logs/issyou-detector.log
+    when: D
+    backupCount: 30
+
+loggers:
+  discord:
+    level: INFO
