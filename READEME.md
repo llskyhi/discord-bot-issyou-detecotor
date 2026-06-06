@@ -1,8 +1,8 @@
 # 一生 detector
-A toy Discord bot that detects keywords like 一生（いっしょう） from messages,
+A toy Discord bot that detects keywords like 一生（いっしょう） and 普通（ふつう） from messages,
 do some useless reaction to them.
 
-The keyword 一生（いっしょう） comes from the *Bang Dream! It's MyGO!!!!!*.
+The keywords all come from the *Bang Dream! It's MyGO!!!!!* -related contents.
 
 # System Requirement
 - Python 3.12 is used on development.
@@ -25,5 +25,5 @@ The keyword 一生（いっしょう） comes from the *Bang Dream! It's MyGO!!!
     ```
     - run with container
     ```shell
-    docker compose up
+    docker compose up [--build]
     ```
