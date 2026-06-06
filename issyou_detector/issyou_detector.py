@@ -5,13 +5,14 @@ __all__ = (
 
 import logging
 import os
-from typing import Optional
+from typing import Iterable, Optional
 
 import discord
 import discord.ext.commands
 
-from issyou_detector.cog import ChannelRegisterCog, VersionCog
-from issyou_detector.datastore import ChannelRegisterRepo
+from .cog import ChannelRegisterCog, VersionCog
+from .datastore import ChannelRegisterRepo
+from .util.discord import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -71,13 +72,8 @@ class IssyouDetector(discord.ext.commands.Bot):
             LOGGER.warning(f"Ignoring message outside guild (probably private message?).")
             return
 
-        if not self._contains_issyou(message):
-            LOGGER.debug(f"The message is considered not containing target content.")
-            return
-
-        LOGGER.info(f"Target content detected in guild {str(message.guild)!r}, channel {str(message.channel)!r}, by user {str(message.author)!r}.")
-        LOGGER.debug(f"Detected message details: {message!r}.")
-        await self._handle_target_message(message)
+        await self._handle_issyou(message)
+        await self._handle_futsuu(message)
 
     @property
     def _dev_guild(self) -> Optional[discord.abc.Snowflake]:
@@ -110,21 +106,31 @@ class IssyouDetector(discord.ext.commands.Bot):
         self.__dev_guild_initialized = True
         return self.__dev_guild
 
-    def _contains_issyou(self, message: discord.Message) -> bool:
-        keywords = (
-            "一輩子",
-            "一生",
-            "いっしょう",
-        )
+    def _message_contains_keyword(
+        self,
+        message: discord.Message,
+        keywords: Iterable[str]
+    ) -> bool:
         if any(keyword in message.content.lower() for keyword in keywords):
-            LOGGER.debug(f"Keyword found in `message.content` ({message.content!r}).")
+            LOGGER.debug(f"One of keywords {keywords} found in `message.content` ({message.content!r}).  Message details: {message!r}")
             return True
 
         # TODO: embed content?
 
         return False
 
-    async def _handle_target_message(self, message: discord.Message) -> None:
+    async def _handle_issyou(self, message: discord.Message) -> None:
+        KEYWORDS = (
+            "一輩子",
+            "一生",
+            "いっしょう",
+        )
+        if not self._message_contains_keyword(message, KEYWORDS):
+            LOGGER.debug(f"The message is considered not containing target content.")
+            return
+
+        LOGGER.info(f"Target content detected in guild {str(message.guild)!r}, channel {str(message.channel)!r}, by user {str(message.author)!r}.")
+
         report_channel = await self._get_report_channel(message)
         if report_channel is None:
             LOGGER.debug(f"No report channel available for guild {message.guild!r}. Aborting.")
@@ -136,6 +142,36 @@ class IssyouDetector(discord.ext.commands.Bot):
         await message.forward(report_channel)
         await report_channel.send(
             "いっしょう...！",
+            # embed=embed,
+        )
+
+    async def _handle_futsuu(self, message: discord.Message) -> None:
+        KEYWORDS = (
+            "普通", # Mandarin, also the kanji of ふつう
+            "ふつう",
+            "理所當然",
+            "当たり前",
+            "あたりまえ",
+        )
+        if not self._message_contains_keyword(message, KEYWORDS):
+            LOGGER.debug(f"The message is considered not containing target content.")
+            return
+
+        LOGGER.info(f"Target content detected in guild {str(message.guild)!r}, channel {str(message.channel)!r}, by user {str(message.author)!r}.")
+        LOGGER.debug(f"Detected message details: {message!r}.")
+
+        report_channel = await self._get_report_channel(message)
+        if report_channel is None:
+            LOGGER.debug(f"No report channel available for guild {message.guild!r}. Aborting.")
+            return
+        LOGGER.debug(f"Forwarding message {message.id} to channel {report_channel!r}.")
+
+        # TODO: additional reactions, like embed?
+        # embed = self._build_notification_embed(message)
+        await message.forward(report_channel)
+        await report_channel.send(
+            # NOTE: Discord displays emoji 🎵 as :musical_note:
+            to_italics("🎵“普通” とか ”あたりまえ” ってなんだろう🎵"),
             # embed=embed,
         )
 
